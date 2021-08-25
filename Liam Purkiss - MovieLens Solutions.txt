@@ -1,0 +1,87 @@
+1
+SELECT title, release_date FROM movies
+WHERE release_date BETWEEN '1983-01-01' AND '1993-12-31'
+ORDER BY release_date ASC;
+
+2	
+SELECT x.name, x.avg FROM
+	(SELECT movies.title AS name, AVG(ratings.rating) AS avg FROM ratings 
+	JOIN movies ON movies.id = ratings.movie_id 
+	GROUP BY ratings.movie_id) AS x
+WHERE x.avg = (
+	SELECT MIN(y.avg) FROM (SELECT AVG(ratings.rating) AS avg FROM ratings 
+	GROUP BY ratings.movie_id) AS y);
+	
+/*better example
+
+
+SELECT title, AVG(rating) AS lowest_avg
+FROM movies
+JOIN ratings ON movies.id = ratings.movie_id
+GROUP BY title
+HAVING lowest_avg = (
+	SELECT MIN(rating_avg)
+	FROM (
+		SELECT AVG(rating) AS rating_avg
+		FROM ratings
+		GROUP BY movie_id
+	) AS min_avg
+);
+
+
+ */
+
+3
+SELECT title AS "Movies with a 5 star rating from a 25 year old male student" FROM movies 
+WHERE id IN (
+	SELECT movie_id FROM ratings
+	WHERE user_id IN (
+		SELECT id FROM users
+		WHERE occupation_id = (
+			SELECT id FROM occupations
+			WHERE name = "student")
+		AND age = 24
+		AND gender = "M")
+	AND rating = 5)
+AND id IN (
+	SELECT movie_id FROM genres_movies
+	WHERE genre_id = (
+		SELECT id FROM genres
+		WHERE name = "Sci-Fi")
+	)
+ORDER BY title ASC;
+
+/*OR*/
+
+SELECT movies.title AS "Movies with a 5 star rating from a 25 year old male student" FROM movies
+JOIN (SELECT movie_id, genre_id FROM genres_movies) AS table2
+ON
+movies.id = table2.movie_id
+JOIN (SELECT movie_id, user_id, rating FROM ratings) AS table3
+ON
+movies.id = table3.movie_id
+JOIN (SELECT id, name FROM genres) AS table4
+ON
+table2.genre_id = table4.id
+JOIN (SELECT id, age, gender,occupation_id FROM users) AS table5
+ON
+table3.user_id = table5.id
+JOIN (SELECT id,name FROM occupations) AS table6
+ON
+table5.occupation_id = table6.id
+WHERE table4.name = 'Sci-Fi' AND table5.age=24 AND table5.gender='M' AND table3.rating = 5 AND table6.name = 'Student'
+GROUP BY movies.id;
+	
+4
+SELECT DISTINCT title FROM movies
+WHERE release_date = (
+	SELECT release_date FROM movies
+	GROUP BY release_date
+	ORDER BY COUNT(id) DESC LIMIT 1
+); 
+
+5
+SELECT genres.name AS Genre, COUNT(genres_movies.movie_id) AS "Number of Films" FROM genres_movies
+JOIN genres ON genres.id = genres_movies.genre_id
+GROUP BY genres_movies.genre_id
+ORDER BY COUNT(genres_movies.movie_id) ASC;

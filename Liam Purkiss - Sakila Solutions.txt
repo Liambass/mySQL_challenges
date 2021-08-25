@@ -1,0 +1,105 @@
+1
+SELECT * FROM actor;
+
+2
+SELECT last_name FROM actor WHERE first_name = "John";
+
+3
+SELECT * FROM actor WHERE last_name = Neeson;
+
+4
+SELECT * FROM actor WHERE actor_id LIKE "%0";
+or
+SELECT * FROM actor WHERE actor_id %10 = 0;
+
+5
+SELECT description FROM film WHERE film_id = 100;
+
+6
+SELECT * FROM film WHERE rating = "R";
+
+7
+SELECT * FROM film WHERE rating != "R";
+
+8
+SELECT title, length FROM film ORDER BY length ASC LIMIT 10;
+
+9
+SELECT title FROM film WHERE length = (
+	SELECT MAX(length) FROM film
+	);
+
+10
+SELECT * FROM film WHERE special_features LIKE "%Deleted Scenes%";
+
+11
+SELECT first_name, last_name FROM actor GROUP BY last_name HAVING COUNT(actor_id) = 1 ORDER BY last_name DESC;
+
+12
+SELECT last_name, COUNT(actor_id) AS Frequency FROM actor GROUP BY last_name HAVING COUNT(actor_id) > 1 ORDER BY COUNT(actor_id) DESC;
+
+13
+SELECT first_name, last_name FROM actor WHERE actor_id = (
+	SELECT actor_id FROM film_actor GROUP BY actor_id ORDER BY COUNT(actor_id) DESC LIMIT 1
+	);
+	
+14
+SELECT film.title, rental.rental_date, DATE_ADD(rental.rental_date, INTERVAL film.rental_duration DAY) AS due_date, inventory.inventory_id FROM film
+LEFT OUTER JOIN inventory ON film.film_id = inventory.film_id
+LEFT OUTER JOIN rental ON rental.inventory_id = inventory.inventory_id
+WHERE film.title = "Academy Dinosaur"
+AND rental.return_date IS NULL
+AND rental.rental_date IS NOT NULL;
+
+15
+SELECT AVG(length) AS average_runtime FROM film;
+
+16
+SELECT category.name AS Genre, AVG(length) AS Average_Runtime FROM film
+JOIN film_category ON film.film_id = film_category.film_id
+JOIN category ON film_category.category_id = category.category_id
+GROUP BY film_category.category_id;
+
+17
+SELECT title, description FROM film WHERE description LIKE "%robot%";
+
+18
+SELECT COUNT(film_id) FROM film WHERE release_year = 2010;
+/*Broken question, all films released in 2006*/
+
+19
+SELECT title FROM film
+JOIN film_category ON film.film_id = film_category.film_id
+JOIN category ON film_category.category_id = category.category_id
+WHERE category.name = "Horror";
+
+20
+SELECT staff_id, CONCAT(first_name,' ', last_name) AS full_name FROM staff WHERE staff_id = 2;
+
+21
+SELECT title FROM film WHERE film_id IN (
+	SELECT film_id FROM film_actor WHERE actor_id = (
+		SELECT actor_id FROM actor WHERE first_name = "Fred" AND last_name = "Costner"
+		)
+	);
+	
+22
+SELECT COUNT(DISTINCT country) FROM country;
+
+23
+SELECT name FROM language ORDER BY name DESC;
+
+24
+SELECT first_name, last_name FROM actor WHERE last_name LIKE "%son" ORDER BY first_name ASC;
+
+25
+SELECT category.name AS Genre, COUNT(film_category.film_id) AS number_of_films FROM film_category
+JOIN category ON film_category.category_id = category.category_id
+GROUP BY film_category.category_id 
+ORDER BY COUNT(film_id) DESC LIMIT 1;
+
+
+
+
+
+
